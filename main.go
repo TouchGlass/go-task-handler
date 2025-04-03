@@ -1,43 +1,48 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-var task string = "World"
-
-type TaskRequest struct {
-	Task string 'json:"task"'
-}
-
-func TaskHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+func CreateTask(c echo.Context) error {
+	var task Task
+	if err := c.Bind(&task); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not bind request body"})
 	}
 
-	var taskreq TaskRequest
-	err := json.NewDecoder(r.Body).Decode(&taskreq)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+	if err := DB.Create(&task).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save task"})
 	}
-	task = taskreq.Task
-	fmt.Fprintln(w, "Task updated successfully!")
+
+	return c.JSON(http.StatusCreated, task)
 }
 
+func GetTask(c echo.Context) error {
+	var tasks []Task
 
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %s!", task)
+	if err := DB.Find(&tasks).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to find tasks"})
+	}
+
+	return c.JSON(http.StatusOK, tasks)
 }
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/task", TaskHandler).Methods("POST")
-	router.HandleFunc("/hello", HelloHandler).Methods("GET")
-	http.ListenAndServe(":8080", router)
+	// Вызываем метод InitDB() из файла db.go
+	InitDB()
 
+	// Автоматическая миграция модели Task
+	DB.AutoMigrate(&Task{})
+
+	e := echo.New()
+	e.POST("api/tasks", CreateTask)
+	e.GET("api/tasks", GetTask)
+
+	e.Logger.Fatal(e.Start(":8080"))
+
+	//router := mux.NewRouter()
+	//router.HandleFunc("/api/tasks", CreateTask).Methods("POST")
+	//router.HandleFunc("/api/tasks", GetTask).Methods("GET")
+	//http.ListenAndServe(":8080", router)
 }
