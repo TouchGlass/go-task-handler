@@ -4,6 +4,8 @@ import (
 	"BDproj/internal/db"
 	"BDproj/internal/handlers"
 	"BDproj/internal/service"
+	"BDproj/internal/web/tasks"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -17,15 +19,16 @@ func main() {
 
 	todoRepository := service.NewTaskRepository(database)
 	todoService := service.NewTaskService(todoRepository)
-	todoHandlers := handlers.NewHandler(todoService)
+	handler := handlers.NewHandler(todoService)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	e.POST("api/tasks", todoHandlers.PostTask)
-	e.GET("api/tasks", todoHandlers.GetTasks)
-	e.PATCH("api/tasks/:id", todoHandlers.PatchTask)
-	e.DELETE("api/tasks/:id", todoHandlers.DeleteTask)
+	strictHandler := tasks.NewStrictHandler(handler, nil)
+	tasks.RegisterHandlers(e, strictHandler)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	if err := e.Start(":8080"); err != nil {
+		log.Fatalf("failed to start with err: %v", err)
+	}
 }

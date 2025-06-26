@@ -40,11 +40,11 @@ func (ts taskService) CreateTask(task Task) (error, Task) {
 	if err := ts.TaskCheck(task); err != nil {
 		return err, Task{}
 	}
-	err := ts.repo.CreateTask(task)
+	createdtask, err := ts.repo.CreateTask(task)
 	if err != nil {
 		return err, Task{}
 	}
-	return nil, task
+	return nil, createdtask
 }
 
 func (ts taskService) GetTasks() ([]Task, error) {

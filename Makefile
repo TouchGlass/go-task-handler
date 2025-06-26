@@ -22,4 +22,8 @@ migrate-version:
 
 # для удобства добавим команду run
 run:
-	go run main.go
+	go run ./cmd/main.go
+
+
+gen:
+	oapi-codegen -config openapi/.openapi-config.yaml -include-tags tasks -package tasks openapi/openapi.yaml > ./internal/web/tasks/api.gen.go
