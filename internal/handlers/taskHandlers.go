@@ -1,18 +1,18 @@
 package handlers
 
 import (
-	"BDproj/internal/service"
+	"BDproj/internal/taskService"
 	"BDproj/internal/web/tasks"
 	"context"
 	"fmt"
 )
 
-type Handler struct {
-	service service.TaskService
+type TaskHandler struct {
+	taskService taskService.TaskService
 }
 
-func (h *Handler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
-	allTasks, err := h.service.GetTasks()
+func (h *TaskHandler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
+	allTasks, err := h.taskService.GetTasks()
 	if err != nil {
 		return nil, err
 	}
@@ -29,16 +29,16 @@ func (h *Handler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject) (ta
 	return response, nil
 }
 
-func (h *Handler) PostTasks(_ context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
+func (h *TaskHandler) PostTasks(_ context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
 
 	taskRequest := request.Body
 
-	taskToCreate := service.Task{
+	taskToCreate := taskService.Task{
 		WhatIsTheTask: taskRequest.WhatIsTheTask,
 		IsDone:        *taskRequest.IsDone,
 	}
 
-	err, createdTask := h.service.CreateTask(taskToCreate)
+	err, createdTask := h.taskService.CreateTask(taskToCreate)
 	if err != nil {
 		return nil, err
 	}
@@ -51,10 +51,10 @@ func (h *Handler) PostTasks(_ context.Context, request tasks.PostTasksRequestObj
 	return response, nil
 }
 
-func (h *Handler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
+func (h *TaskHandler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRequestObject) (tasks.DeleteTasksIdResponseObject, error) {
 	taskIDstr := fmt.Sprintf("%d", request.Id)
 
-	if err := h.service.DeleteTaskByID(taskIDstr); err != nil {
+	if err := h.taskService.DeleteTaskByID(taskIDstr); err != nil {
 		return nil, err
 	}
 
@@ -62,17 +62,17 @@ func (h *Handler) DeleteTasksId(_ context.Context, request tasks.DeleteTasksIdRe
 
 }
 
-func (h *Handler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
+func (h *TaskHandler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequestObject) (tasks.PatchTasksIdResponseObject, error) {
 	taskIDstr := fmt.Sprintf("%d", request.Id)
 
 	patchBody := request.Body
 
-	taskToUpdate := service.Task{
+	taskToUpdate := taskService.Task{
 		WhatIsTheTask: *patchBody.WhatIsTheTask,
 		IsDone:        *patchBody.IsDone,
 	}
 
-	task, err := h.service.UpdateTask(taskIDstr, taskToUpdate)
+	task, err := h.taskService.UpdateTask(taskIDstr, taskToUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +87,6 @@ func (h *Handler) PatchTasksId(_ context.Context, request tasks.PatchTasksIdRequ
 }
 
 // создание хэндлеров
-func NewHandler(s service.TaskService) *Handler {
-	return &Handler{service: s}
+func NewTaskHandler(ts taskService.TaskService) *TaskHandler {
+	return &TaskHandler{taskService: ts}
 }
