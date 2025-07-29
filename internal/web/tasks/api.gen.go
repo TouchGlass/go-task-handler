@@ -18,12 +18,14 @@ import (
 type Task struct {
 	Id            *uint  `json:"id,omitempty"`
 	IsDone        *bool  `json:"is_done,omitempty"`
+	UserId        uint   `json:"user_id"`
 	WhatIsTheTask string `json:"what_is_the_task"`
 }
 
 // PatchTasksIdJSONBody defines parameters for PatchTasksId.
 type PatchTasksIdJSONBody struct {
 	IsDone        *bool   `json:"is_done,omitempty"`
+	UserId        *uint   `json:"user_id,omitempty"`
 	WhatIsTheTask *string `json:"what_is_the_task,omitempty"`
 }
 

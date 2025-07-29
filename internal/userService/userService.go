@@ -1,6 +1,7 @@
 package userService
 
 import (
+	"BDproj/internal/taskService"
 	"errors"
 )
 
@@ -10,6 +11,7 @@ type UserService interface {
 	GetUserByID(id string) (User, error)
 	UpdateUser(id string, user User) (User, error)
 	DeleteUserByID(id string) error
+	GetTasksForUser(userID uint) ([]taskService.Task, error)
 }
 type userService struct {
 	userRepo UserRepository
@@ -68,4 +70,12 @@ func (us userService) UpdateUser(id string, user User) (User, error) {
 
 func (us userService) DeleteUserByID(id string) error {
 	return us.userRepo.DeleteUserByID(id)
+}
+
+func (us userService) GetTasksForUser(userID uint) ([]taskService.Task, error) {
+	tasks, err := us.userRepo.GetTasksForUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
 }

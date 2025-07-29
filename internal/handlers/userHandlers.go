@@ -11,6 +11,27 @@ type UserHandler struct {
 	userService userService2.UserService
 }
 
+func (u UserHandler) GetTasksByUserID(_ context.Context, request users.GetTasksByUserIDRequestObject) (users.GetTasksByUserIDResponseObject, error) {
+	userID := request.Id
+	userTasks, err := u.userService.GetTasksForUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	response := users.GetTasksByUserID200JSONResponse{}
+
+	for _, usertasks := range userTasks {
+		task := users.Task{
+			Id:            &usertasks.ID,
+			WhatIsTheTask: usertasks.WhatIsTheTask,
+			IsDone:        &usertasks.IsDone,
+			UserId:        usertasks.UserID,
+		}
+		response = append(response, task)
+
+	}
+	return response, err
+}
+
 func (u UserHandler) GetUsers(_ context.Context, _ users.GetUsersRequestObject) (users.GetUsersResponseObject, error) {
 	allUsers, err := u.userService.GetUsers()
 	if err != nil {

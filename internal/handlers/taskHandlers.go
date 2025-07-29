@@ -16,6 +16,7 @@ func (h *TaskHandler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject)
 	if err != nil {
 		return nil, err
 	}
+
 	response := tasks.GetTasks200JSONResponse{}
 
 	for _, tsk := range allTasks {
@@ -23,19 +24,21 @@ func (h *TaskHandler) GetTasks(_ context.Context, _ tasks.GetTasksRequestObject)
 			Id:            &tsk.ID,
 			IsDone:        &tsk.IsDone,
 			WhatIsTheTask: tsk.WhatIsTheTask,
+			UserId:        tsk.UserID,
 		}
 		response = append(response, task)
 	}
+
 	return response, nil
 }
 
 func (h *TaskHandler) PostTasks(_ context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
-
 	taskRequest := request.Body
 
 	taskToCreate := taskService.Task{
 		WhatIsTheTask: taskRequest.WhatIsTheTask,
 		IsDone:        *taskRequest.IsDone,
+		UserID:        taskRequest.UserId,
 	}
 
 	err, createdTask := h.taskService.CreateTask(taskToCreate)
@@ -47,6 +50,7 @@ func (h *TaskHandler) PostTasks(_ context.Context, request tasks.PostTasksReques
 		Id:            &createdTask.ID,
 		WhatIsTheTask: createdTask.WhatIsTheTask,
 		IsDone:        &createdTask.IsDone,
+		UserId:        createdTask.UserID,
 	}
 	return response, nil
 }
@@ -70,6 +74,7 @@ func (h *TaskHandler) PatchTasksId(_ context.Context, request tasks.PatchTasksId
 	taskToUpdate := taskService.Task{
 		WhatIsTheTask: *patchBody.WhatIsTheTask,
 		IsDone:        *patchBody.IsDone,
+		UserID:        *patchBody.UserId,
 	}
 
 	task, err := h.taskService.UpdateTask(taskIDstr, taskToUpdate)
@@ -81,6 +86,7 @@ func (h *TaskHandler) PatchTasksId(_ context.Context, request tasks.PatchTasksId
 		Id:            &task.ID,
 		WhatIsTheTask: task.WhatIsTheTask,
 		IsDone:        &task.IsDone,
+		UserId:        *patchBody.UserId,
 	}
 
 	return response, err

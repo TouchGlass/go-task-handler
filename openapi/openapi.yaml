@@ -54,6 +54,9 @@ paths:
                   type: string
                 is_done:
                   type: boolean
+                user_id:
+                  type: integer
+                  format: uint
       responses:
         '200':
           description: Task updated
@@ -146,6 +149,28 @@ paths:
       responses:
         '204':
           description: User deleted successfully
+  /users/{id}/tasks:
+    get:
+      summary: Get all user's tasks
+      operationId: GetTasksByUserID
+      tags: [users]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      responses:
+        '200':
+          description: User's tasks list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
 
 
 
@@ -157,11 +182,16 @@ components:
         id:
           type: integer
           format: uint
+        user_id:
+          type: integer
+          format: uint
         what_is_the_task:
           type: string
         is_done:
           type: boolean
-      required: [what_is_the_task]
+      required:
+        - what_is_the_task
+        - user_id
 
     User:
       type: object

@@ -21,7 +21,7 @@ func NewTaskService(repo TaskRepository) *taskService {
 	return &taskService{taskRepo: repo}
 }
 
-func (ts taskService) TaskCheck(task Task) error {
+func (ts *taskService) TaskCheck(task Task) error {
 	trimmed := strings.TrimSpace(task.WhatIsTheTask)
 
 	if trimmed == "" {
@@ -36,7 +36,7 @@ func (ts taskService) TaskCheck(task Task) error {
 	return nil
 }
 
-func (ts taskService) CreateTask(task Task) (error, Task) {
+func (ts *taskService) CreateTask(task Task) (error, Task) {
 	if err := ts.TaskCheck(task); err != nil {
 		return err, Task{}
 	}
@@ -47,15 +47,16 @@ func (ts taskService) CreateTask(task Task) (error, Task) {
 	return nil, createdtask
 }
 
-func (ts taskService) GetTasks() ([]Task, error) {
-	return ts.taskRepo.GetTasks()
+func (ts *taskService) GetTasks() ([]Task, error) {
+	tasks, err := ts.taskRepo.GetTasks()
+	return tasks, err
 }
 
-func (ts taskService) GetTaskByID(id string) (Task, error) {
+func (ts *taskService) GetTaskByID(id string) (Task, error) {
 	return ts.taskRepo.GetTaskByID(id)
 }
 
-func (ts taskService) UpdateTask(id string, task Task) (Task, error) {
+func (ts *taskService) UpdateTask(id string, task Task) (Task, error) {
 
 	var dbtask Task
 	dbtask, err := ts.GetTaskByID(id)
@@ -65,6 +66,7 @@ func (ts taskService) UpdateTask(id string, task Task) (Task, error) {
 
 	dbtask.WhatIsTheTask = task.WhatIsTheTask
 	dbtask.IsDone = task.IsDone
+	dbtask.UserID = task.UserID
 
 	if err := ts.taskRepo.UpdateTask(dbtask); err != nil {
 		return Task{}, err
@@ -73,6 +75,6 @@ func (ts taskService) UpdateTask(id string, task Task) (Task, error) {
 	return dbtask, nil
 }
 
-func (ts taskService) DeleteTaskByID(id string) error {
+func (ts *taskService) DeleteTaskByID(id string) error {
 	return ts.taskRepo.DeleteTaskByID(id)
 }

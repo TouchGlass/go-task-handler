@@ -1,6 +1,9 @@
 package userService
 
-import "gorm.io/gorm"
+import (
+	"BDproj/internal/taskService"
+	"gorm.io/gorm"
+)
 
 type UserRepository interface {
 	CreateUser(user User) (User, error)
@@ -8,6 +11,7 @@ type UserRepository interface {
 	GetUserByID(id string) (User, error)
 	UpdateUser(user User) error
 	DeleteUserByID(id string) error
+	GetTasksForUser(userID uint) ([]taskService.Task, error)
 }
 
 type userRepository struct {
@@ -40,5 +44,13 @@ func (repo *userRepository) UpdateUser(user User) error {
 }
 
 func (repo *userRepository) DeleteUserByID(id string) error {
-	return repo.db.Delete(&User{}, "id = ?", id).Error
+	return repo.db.Unscoped().Delete(&User{}, "id = ?", id).Error
+}
+
+func (repo *userRepository) GetTasksForUser(userID uint) ([]taskService.Task, error) {
+	var tasks []taskService.Task
+	err := repo.db.
+		Where("user_id = ?", userID).
+		Find(&tasks).Error
+	return tasks, err
 }

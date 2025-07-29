@@ -1,6 +1,8 @@
 package taskService
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type TaskRepository interface {
 	CreateTask(task Task) (Task, error)
@@ -20,7 +22,8 @@ func NewTaskRepository(db *gorm.DB) *taskRepository {
 }
 
 func (repo *taskRepository) CreateTask(task Task) (Task, error) {
-	return task, repo.db.Create(&task).Error
+	err := repo.db.Create(&task).Error
+	return task, err
 }
 
 func (repo *taskRepository) GetTasks() ([]Task, error) {
